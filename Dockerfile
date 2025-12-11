@@ -24,26 +24,24 @@ RUN set -eux && \
     tzdata \
     # 直接下载并构建 caddy（无需本地源代码）
     && git clone --depth 1 https://github.com/caddyserver/caddy . \
-    # 构建静态二进制文件
-    # && CGO_ENABLED=1 go build \
+    # 构建完全静态二进制文件（适用于scratch镜像）
     && CGO_ENABLED=1 go build \
     -tags extended,netgo,osusergo \
     -ldflags="-s -w -extldflags -static" \
-    # -ldflags="-s -w" \
     -o caddy \
     # 显示构建后的文件大小
     && echo "Binary size after build:" \
-    # && du -h caddy \
     && du -b caddy \
     # 使用strip进一步减小二进制文件大小
     && strip --strip-all caddy \
     && echo "Binary size after stripping:" \
-    # && du -h caddy \
-    && du -b caddy \
-    && upx --best --lzma caddy \
-    && echo "Binary size after upx:" \
-    # && du -h caddy \
     && du -b caddy
+    # 注意：完全静态二进制文件（使用-extldflags -static）与UPX不兼容
+    # 因此跳过UPX压缩，或者可以选择安装upx并使用动态链接
+    # 如果需要UPX压缩，可以安装upx并取消注释下面的行
+    # && upx --best --lzma caddy \
+    # && echo "Binary size after upx:" \
+    # && du -b caddy
     # 注意：这里故意不清理构建依赖，因为是多阶段构建，且清理会触发busybox触发器错误
     # 最终镜像只复制二进制文件，构建阶段的中间层不会影响最终镜像大小
     # # 清理构建依赖
