@@ -1,0 +1,57 @@
+# Caddyfile 配置示例
+# 这是一个简单的Caddy配置文件，用于静态文件服务和反向代理
+
+# 全局配置
+{
+    # 自动HTTPS配置
+    # auto_https disable_redirects  # 禁用自动HTTPS重定向（如果需要）
+    # email admin@example.com       # 用于Let's Encrypt证书的邮箱
+}
+
+# HTTP重定向到HTTPS（可选）
+# http://example.com {
+#     redir https://{host}{uri} permanent
+# }
+
+# 主站点配置 - 静态文件服务
+localhost:8080, example.com:8080 {
+    # 根目录
+    root * /caddydir/www
+    
+    # 文件服务器
+    file_server
+    
+    # 启用gzip压缩
+    encode gzip
+    
+    # 默认文件
+    try_files {path} {path}/index.html index.html
+    
+    # 日志配置
+    log {
+        output file /caddydir/logs/access.log
+    }
+}
+
+# 反向代理示例
+# api.example.com {
+#     reverse_proxy localhost:3000 {
+#         # 代理设置
+#         header_up Host {host}
+#         header_up X-Real-IP {remote}
+#         header_up X-Forwarded-For {remote}
+#         header_up X-Forwarded-Proto {scheme}
+#     }
+# }
+
+# PHP FastCGI示例（如果运行PHP应用）
+# php.example.com {
+#     root * /caddydir/phpapp
+#     php_fastcgi localhost:9000
+#     file_server
+# }
+
+# 简单的API代理
+# proxy localhost:2019 {
+#     to localhost:3001
+# }

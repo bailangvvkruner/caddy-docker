@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  caddy:
+    build: .
+    container_name: caddy-server
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2019:2019"
+    volumes:
+      - ./caddy-data:/caddydir
+    environment:
+      - TZ=Asia/Shanghai
+      - CADDYPATH=/caddydir/data
+    networks:
+      - caddy-network
+    healthcheck:
+      test: ["CMD", "/caddy", "version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  caddy-network:
+    driver: bridge
